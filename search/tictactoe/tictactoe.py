@@ -22,6 +22,8 @@ def player(board):
     """
     Returns player who has the next turn on a board.
     """
+
+    # Counts he number of Xs and Os on board
     numX = 0
     numO = 0
 
@@ -29,14 +31,16 @@ def player(board):
         for square in board[row]:
             if square == X:
                 numX += 1
-            elif square == 0:
+            elif square == O:
                 numO += 1
 
+    # Checks if game is over
+    # If not and there are more Xs than Os, O will go next because X went first
     if terminal(board):
         return "The Game is Already Over"
     elif numX > numO:
         return O
-    elif numO == numX:
+    else:
         return X
 
 
@@ -49,6 +53,7 @@ def actions(board):
 
     actions = set()
 
+    # Iterates through every square, and if empty adds it to the set of possible moves
     for i in range(len(board[0])):
         for j in range(len(board)):
             if board[i][j] == EMPTY:
@@ -71,14 +76,14 @@ def result(board, action):
         return newBoard
 
     else:
-        raise NameError("Could not find action")
+        raise Exception("Could not find action")
 
 
 def winner(board):
     """
     Returns the winner of the game, if there is one.
     """
-    # Check horizontal
+    # Checks horizontal win condition
     for row in board:
         # result = row.count(row[0]) == len(row)
         if (row.count(X) == len(row)):
@@ -86,12 +91,12 @@ def winner(board):
         if (row.count(O) == len(row)):
             return O
 
-    # Check vertical
+    # Checks vertical win condition
     for col in range(len(board[0])):
-        if board[col][0] == board[col][1] and board[col][0] == board[col][2]:
-            return board[col][0]
+        if board[0][col] == board[1][col] and board[0][col] == board[2][col]:
+            return board[0][col]
 
-    # Check diagonal
+    # Checks diagonal win condition
     if board[0][0] == board[1][1] and board[0][0] == board[2][2]:
         return board[0][0]
     if board[0][2] == board[1][1] and board[0][2] == board[2][0]:
@@ -107,6 +112,7 @@ def terminal(board):
     if winner(board):
         return True
 
+    # Game can be continued if there is an open square
     for row in board:
         for cell in row:
             if cell is EMPTY:
@@ -118,6 +124,9 @@ def utility(board):
     """
     Returns 1 if X has won the game, -1 if O has won, 0 otherwise.
     """
+
+    # X is max
+    # O is min
     if winner(board) == X:
         return 1
     elif winner(board) == O:
@@ -136,24 +145,38 @@ def minimax(board):
     bestMove = None
 
     if player(board) == X:
+
+        # X always makes the same opening move
         if board == initial_state():
             bestMove = (1, 1)
             return bestMove
+
+        # X is trying to find the move that will maximize their score
         else:
-            prevMax = -math.inf
+            v = -math.inf
             for action in actions(board):
-                max = Minimize(result(board, action))
-                if max > prevMax:
+
+                # Checks to see if the action will cause a win condition
+                if winner(result(board, action)) != None:
+                    return action
+
+                temp = Minimize(result(board, action))
+                if temp > v:
                     bestMove = action
-                    prevMax = max
+                    v = temp
 
     if player(board) == O:
-        prevMin = math.inf
+
+        # O is trying to find the move that will minimize their score
+        v = math.inf
         for action in actions(board):
-            min = Minimize(result(board, action))
-            if min > prevMin:
+            if winner(result(board, action)) != None:
+                return action
+
+            temp = Maximize(result(board, action))
+            if temp < v:
                 bestMove = action
-                prevMin = min
+                v = temp
 
     return bestMove
 
@@ -164,6 +187,7 @@ def Maximize(board):
     if terminal(board):
         return utility(board)
 
+    # Checks every possible action to see if the board can produce a win (+1)
     for action in actions(board):
         v = max(v, Minimize(result(board, action)))
 
@@ -176,6 +200,7 @@ def Minimize(board):
     if terminal(board):
         return utility(board)
 
+    # Checks every possible action to see if the board can produce a win (-1)
     for action in actions(board):
         v = min(v, Maximize(result(board, action)))
 
