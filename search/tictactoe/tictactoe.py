@@ -154,6 +154,7 @@ def minimax(board):
         # X is trying to find the move that will maximize their score
         else:
             v = -math.inf
+            print("AI is looking for optimal move...")
             for action in actions(board):
 
                 # Checks to see if the action will cause a win condition
@@ -169,6 +170,7 @@ def minimax(board):
 
         # O is trying to find the move that will minimize their score
         v = math.inf
+        print("AI is looking for optimal move...")
         for action in actions(board):
             if winner(result(board, action)) != None:
                 return action
@@ -178,6 +180,7 @@ def minimax(board):
                 bestMove = action
                 v = temp
 
+    print("AI found the optimal move :(")
     return bestMove
 
 
